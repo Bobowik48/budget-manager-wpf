@@ -54,6 +54,11 @@ namespace BudgetManager.ViewModels
         public ICommand AddCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand ClearCommand { get; }
+        public ICommand EditCommand { get; }
+        public ICommand PreviewCommand { get; }
+
+        // Zmienna, która zapamięta, którą transakcję właśnie edytujemy
+        private TransactionItem _editingTransaction;
 
         public MainViewModel()
         {
@@ -62,8 +67,10 @@ namespace BudgetManager.ViewModels
 
             // Inicjalizacja komend i podpięcie funkcji
             AddCommand = new RelayCommand(AddTransaction, CanAddTransaction);
-            DeleteCommand = new RelayCommand(DeleteTransaction, CanDeleteTransaction);
+            DeleteCommand = new RelayCommand(DeleteTransaction, CanModifyTransaction);
             ClearCommand = new RelayCommand(ClearForm);
+            EditCommand = new RelayCommand(EditTransaction, CanModifyTransaction);
+            PreviewCommand = new RelayCommand(PreviewTransaction, CanModifyTransaction);
 
             // Przygotowanie czystego formularza na start i obliczenie bilansu
             ClearForm(null);
@@ -86,21 +93,37 @@ namespace BudgetManager.ViewModels
         // Akcja dodawania
         private void AddTransaction(object parameter)
         {
-            Transactions.Add(new TransactionItem
+            var newTx = new TransactionItem
             {
                 Date = NewTransaction.Date,
                 Type = NewTransaction.Type,
                 Category = NewTransaction.Category,
                 Amount = NewTransaction.Amount,
                 Description = NewTransaction.Description
-            });
+            };
+
+            if (_editingTransaction != null)
+            {
+                // TRYB EDYCJI: Podmieniamy stary wpis na nowy w tym samym miejscu na liście
+                int index = Transactions.IndexOf(_editingTransaction);
+                if (index != -1)
+                {
+                    Transactions[index] = newTx;
+                }
+                _editingTransaction = null; // Wyłączamy tryb edycji
+            }
+            else
+            {
+                // TRYB NORMALNY: Po prostu dodajemy nowy wpis na koniec
+                Transactions.Add(newTx);
+            }
 
             UpdateSummary();
             ClearForm(null);
         }
 
         // Kiedy przycisk "Usuń" ma być klikalny? (tylko jak coś jest zaznaczone)
-        private bool CanDeleteTransaction(object parameter)
+        private bool CanModifyTransaction(object parameter)
         {
             return SelectedTransaction != null;
         }
@@ -118,6 +141,7 @@ namespace BudgetManager.ViewModels
         // Akcja czyszczenia formularza
         private void ClearForm(object parameter)
         {
+            _editingTransaction = null; // Czyszczenie resetuje też ewentualny stan edycji
             NewTransaction = new TransactionItem
             {
                 Date = DateTime.Today,
@@ -134,6 +158,41 @@ namespace BudgetManager.ViewModels
             IncomeSummary = Transactions.Where(t => t.Type == "Przychód").Sum(t => t.Amount);
             ExpensesSummary = Transactions.Where(t => t.Type == "Wydatek").Sum(t => t.Amount);
             Balance = IncomeSummary - ExpensesSummary;
+        }
+
+        private void EditTransaction(object parameter)
+        {
+            if (SelectedTransaction == null) return;
+
+            // Zapisujemy referencję do edytowanego elementu
+            _editingTransaction = SelectedTransaction;
+
+            // Kopiujemy dane zaznaczonego elementu do formularza
+            NewTransaction = new TransactionItem
+            {
+                Date = SelectedTransaction.Date,
+                Type = SelectedTransaction.Type,
+                Category = SelectedTransaction.Category,
+                Amount = SelectedTransaction.Amount,
+                Description = SelectedTransaction.Description
+            };
+        }
+
+        private void PreviewTransaction(object parameter)
+        {
+            if (SelectedTransaction != null)
+            {
+                // Proste okienko wyskakujące z detalami transakcji
+                System.Windows.MessageBox.Show(
+                    $"Data: {SelectedTransaction.Date:dd.MM.yyyy}\n" +
+                    $"Typ: {SelectedTransaction.Type}\n" +
+                    $"Kategoria: {SelectedTransaction.Category}\n" +
+                    $"Kwota: {SelectedTransaction.Amount:N2} zł\n\n" +
+                    $"Opis:\n{SelectedTransaction.Description}",
+                    "Szczegóły transakcji",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+            }
         }
     }
 }
