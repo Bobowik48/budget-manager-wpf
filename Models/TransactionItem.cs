@@ -1,19 +1,22 @@
 using BudgetManager.Infrastructure;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BudgetManager.Models
 {
     public class TransactionItem : ObservableObject
     {
+        private int _id;
         private DateTime _date;
-        private string _type;
-        private string _category;
+        private string _type = string.Empty;
+        private string _category = string.Empty;
         private decimal _amount;
-        private string _description;
+        private string _description = string.Empty;
+
+        public int Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(); }
+        }
 
         public DateTime Date
         {

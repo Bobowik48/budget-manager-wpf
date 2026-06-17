@@ -1,0 +1,47 @@
+<Window x:Class="BudgetManager.Views.PdfExportDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Generuj raport PDF"
+        Height="260" Width="420"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F5F7FA">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Generuj raport PDF"
+                   FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16"/>
+
+        <TextBlock Grid.Row="1" Text="Zakres danych:"
+                   FontSize="12" FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,6"/>
+
+        <ComboBox Grid.Row="2" x:Name="MonthComboBox"
+                  Height="36" FontSize="13" Margin="0,0,0,16"
+                  DisplayMemberPath="Label"/>
+
+        <CheckBox Grid.Row="3" x:Name="OpenAfterExport"
+                  Content="Otwórz PDF po wygenerowaniu"
+                  IsChecked="True" Margin="0,0,0,16" FontSize="13"/>
+
+        <TextBlock Grid.Row="4" x:Name="StatusText"
+                   FontSize="11" Foreground="#6B7280" TextWrapping="Wrap"
+                   VerticalAlignment="Bottom"/>
+
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Anuluj" Width="100" Height="36" Margin="0,0,10,0"
+                    Click="Cancel_Click"
+                    Background="White" BorderBrush="#D1D5DB"/>
+            <Button x:Name="GenerateButton" Content="📄  Generuj PDF"
+                    Width="130" Height="36"
+                    Click="Generate_Click"
+                    Background="#2563EB" Foreground="White" BorderBrush="#2563EB"/>
+        </StackPanel>
+    </Grid>
+</Window>
